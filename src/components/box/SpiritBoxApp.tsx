@@ -143,6 +143,7 @@ export function SpiritBoxApp() {
   const [note, setNote] = useState<string | null>(null);
   const [micError, setMicError] = useState<string | null>(null);
   const [micPending, setMicPending] = useState(false);
+  const [armPending, setArmPending] = useState(false);
   const [question, setQuestion] = useState("");
   const [hearingAsk, setHearingAsk] = useState(false);
   const [spell, setSpell] = useState<string | null>(null);
@@ -185,10 +186,11 @@ export function SpiritBoxApp() {
   const arm = async (withMic: boolean) => {
     setArmError(null);
     setMicError(null);
+    setArmPending(true);
     try {
       let stream: MediaStream | null = null;
       if (withMic) stream = await requestMic();
-      await field.start();
+      // Unlock audio first while we still have the tap gesture.
       await box.unlock();
       if (stream) {
         box.attachMic(stream);
@@ -197,6 +199,12 @@ export function SpiritBoxApp() {
       }
       setArmed(true);
       box.startScan();
+      // Field sensors are optional — never block arming if magnetometer /
+      // motion permission hangs (common on some Android Chrome builds).
+      void Promise.race([
+        field.start().catch(() => false),
+        new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 1200)),
+      ]);
       try {
         if (sessionStorage.getItem("spookbox-session") !== "1") {
           const r = await bumpSessionCount();
@@ -209,6 +217,8 @@ export function SpiritBoxApp() {
     } catch (err) {
       if (withMic) setMicError(micErrorMessage(err));
       else setArmError("Couldn't start the receiver. Tap again with sound allowed.");
+    } finally {
+      setArmPending(false);
     }
   };
 
@@ -322,12 +332,12 @@ export function SpiritBoxApp() {
         <p className="mt-4 max-w-sm text-center text-sm text-muted">
           A working spirit box. Sweep for hits, or ask on the Witch Board.
         </p>
-        <Button size="xl" className="mt-8" onClick={() => void arm(false)}>
-          Arm the receiver
+        <Button size="xl" className="mt-8" disabled={armPending} onClick={() => void arm(false)}>
+          {armPending ? "Arming…" : "Arm the receiver"}
         </Button>
-        <Button variant="ghost" size="lg" className="mt-3" onClick={() => void arm(true)}>
+        <Button variant="ghost" size="lg" className="mt-3" disabled={armPending} onClick={() => void arm(true)}>
           <Mic className="size-4" />
-          Arm with open mic
+          {armPending ? "Arming…" : "Arm with open mic"}
         </Button>
         {armError && <p className="mt-3 text-center text-sm text-danger">{armError}</p>}
         {micError && (

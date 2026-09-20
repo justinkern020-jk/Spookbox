@@ -75,7 +75,7 @@ export function FieldGauge() {
       {!reading.error && (
         <p className="mt-2 text-xs text-muted">
           {reading.live
-            ? "Wave the phone past metal, a speaker, or wiring. A jump lights the meter and locks a word."
+            ? "Wave the phone past metal, a speaker, or wiring. Scale reads up to 2000 mG. A jump lights the meter and locks a word."
             : "Tap Start meter, then move the phone. Uses the compass magnetometer."}
         </p>
       )}

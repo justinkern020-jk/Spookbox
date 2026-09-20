@@ -41,10 +41,10 @@ function magnetometerCtor(): (new (opts?: { frequency?: number }) => MagSensor) 
 
 function toBars(deltaMg: number) {
   if (deltaMg < 3) return 0;
-  if (deltaMg < 8) return 1;
-  if (deltaMg < 16) return 2;
-  if (deltaMg < 30) return 3;
-  if (deltaMg < 55) return 4;
+  if (deltaMg < 12) return 1;
+  if (deltaMg < 35) return 2;
+  if (deltaMg < 80) return 3;
+  if (deltaMg < 200) return 4;
   return 5;
 }
 
@@ -120,7 +120,7 @@ export class FieldSensor {
     this.baseline = this.baseline * 0.985 + value * 0.015;
     this.delta = Math.abs(value - this.baseline);
     const deltaMg = kind === "magnetometer" ? this.delta * 10 : this.delta * 3;
-    if (kind === "compass") this.milligauss = Math.min(200, 2 + deltaMg);
+    if (kind === "compass") this.milligauss = Math.min(2000, 2 + deltaMg);
     this.bars = toBars(deltaMg);
     const threshold = kind === "magnetometer" ? 1.6 : 4;
     const now = performance.now();

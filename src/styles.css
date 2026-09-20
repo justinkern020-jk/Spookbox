@@ -1,0 +1,176 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #070807;
+  --color-surface: #101410;
+  --color-raised: #171c17;
+  --color-fg: #c8d4c4;
+  --color-muted: #7a8a7a;
+  --color-accent: #8fbf7a;
+  --color-accent-fg: #0b100c;
+  --color-line: #2a322a;
+  --color-danger: #b85a4a;
+  --color-danger-fg: #f3e6d8;
+
+  --font-display: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 28px;
+}
+
+html[data-theme="steam"] {
+  --color-bg: #140e0a;
+  --color-surface: #241810;
+  --color-raised: #2e2016;
+  --color-fg: #ead9bc;
+  --color-muted: #a89274;
+  --color-accent: #c4a36a;
+  --color-accent-fg: #1a120c;
+  --color-line: #5c4630;
+  --color-danger: #9a4030;
+  --color-danger-fg: #f3e6d8;
+  --font-display: "Cormorant Garamond", "Times New Roman", serif;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html,
+  body,
+  #app {
+    min-height: 100%;
+    background: var(--color-bg);
+    color: var(--color-fg);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    text-wrap: pretty;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.chassis {
+  background-color: var(--color-surface);
+  background-image:
+    linear-gradient(180deg, color-mix(in oklab, var(--color-accent) 8%, transparent), transparent 32%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.015) 0px,
+      transparent 1px,
+      transparent 3px
+    );
+  border: 1px solid var(--color-line);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--color-fg) 8%, transparent);
+}
+
+html[data-theme="steam"] .chassis {
+  border: 2px solid color-mix(in oklab, var(--color-accent) 70%, var(--color-line));
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--color-accent) 35%, transparent),
+    inset 0 0 0 6px var(--color-surface);
+  background-image:
+    radial-gradient(circle at 12px 12px, var(--color-accent) 1.4px, transparent 1.6px),
+    radial-gradient(circle at calc(100% - 12px) 12px, var(--color-accent) 1.4px, transparent 1.6px),
+    radial-gradient(circle at 12px calc(100% - 12px), var(--color-accent) 1.4px, transparent 1.6px),
+    radial-gradient(circle at calc(100% - 12px) calc(100% - 12px), var(--color-accent) 1.4px, transparent 1.6px),
+    linear-gradient(180deg, color-mix(in oklab, var(--color-accent) 14%, transparent), transparent 40%);
+}
+
+.phosphor {
+  color: var(--color-accent);
+  text-shadow: 0 0 12px color-mix(in oklab, var(--color-accent) 45%, transparent);
+}
+
+.scanlines {
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.18) 3px
+  );
+  pointer-events: none;
+}
+
+html[data-theme="steam"] .scanlines {
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(20, 14, 10, 0.22) 4px
+  );
+}
+
+@keyframes pulse-lock {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.word-lock {
+  animation: pulse-lock 900ms ease-in-out;
+}
+
+.bulb-on {
+  filter: drop-shadow(0 0 14px color-mix(in oklab, var(--color-accent) 80%, transparent));
+}
+
+/* Witch Board — canvas sits in a wood/brass well; planchette is drawn in JS. */
+.witch-board {
+  position: relative;
+  overflow: hidden;
+  margin-top: 0.5rem;
+  border-radius: 14px;
+  border: 1px solid var(--color-line);
+  background:
+    radial-gradient(120% 80% at 50% 0%, color-mix(in oklab, var(--color-accent) 12%, transparent), transparent 55%),
+    var(--color-bg);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-accent) 18%, transparent);
+}
+
+.witch-board__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: none;
+}
+
+html[data-theme="steam"] .witch-board {
+  border-color: color-mix(in oklab, var(--color-accent) 65%, var(--color-line));
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--color-accent) 40%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--color-accent) 20%, transparent);
+}
+

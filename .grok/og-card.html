@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Kern's Spookbox</title>
+  <style>
+    @font-face {
+      font-family: "Cinzel Decorative";
+      src: url("./fonts/CinzelDecorative-Bold.ttf") format("truetype");
+      font-weight: 700;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Cinzel";
+      src: url("./fonts/Cinzel-Bold.ttf") format("truetype");
+      font-weight: 700;
+      font-style: normal;
+    }
+    html, body {
+      margin: 0;
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+      background: #070807;
+    }
+    .stage {
+      position: relative;
+      width: 1200px;
+      height: 630px;
+    }
+    .scene { position: absolute; inset: 0; }
+    .scrim {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 58% 52% at 50% 46%, rgba(7,8,7,0.12) 0%, rgba(20,14,10,0.42) 58%, rgba(7,8,7,0.82) 100%),
+        linear-gradient(180deg, rgba(7,8,7,0.28) 0%, transparent 26%, transparent 62%, rgba(7,8,7,0.62) 100%);
+      z-index: 3;
+      pointer-events: none;
+    }
+    .grain {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      pointer-events: none;
+      opacity: 0.16;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .lockup {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -52%);
+      width: 720px;
+      text-align: center;
+      z-index: 5;
+    }
+    .line-one, .line-two, .tag {
+      display: block;
+      margin: 0;
+    }
+    .line-one {
+      font-family: "Cinzel Decorative", serif;
+      font-weight: 700;
+      font-size: 86px;
+      line-height: 0.94;
+      letter-spacing: 0.04em;
+      padding-left: 0.04em;
+      background: linear-gradient(180deg, #F3E6C8 0%, #EAD9BC 38%, #C4A36A 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter:
+        drop-shadow(0 1px 0 #140E0A)
+        drop-shadow(0 3px 0 rgba(20,14,10,0.9))
+        drop-shadow(0 14px 24px rgba(0,0,0,0.6))
+        drop-shadow(0 0 26px rgba(196,163,106,0.28));
+    }
+    .rule {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 14px auto 12px;
+      width: 380px;
+    }
+    .rule-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #C4A36A, transparent);
+      opacity: 0.9;
+    }
+    .diamond {
+      width: 8px;
+      height: 8px;
+      transform: rotate(45deg);
+      background: #C4A36A;
+      box-shadow: 0 0 10px rgba(143,191,122,0.55);
+    }
+    .line-two {
+      font-family: "Cinzel", serif;
+      font-weight: 700;
+      font-size: 44px;
+      line-height: 1;
+      letter-spacing: 0.34em;
+      padding-left: 0.34em;
+      color: #EAD9BC;
+      text-shadow:
+        0 1px 0 #140E0A,
+        0 2px 0 #140E0A,
+        0 10px 18px rgba(0,0,0,0.55),
+        0 0 22px rgba(143,191,122,0.22);
+    }
+    .tag {
+      margin-top: 16px;
+      font-family: "Cinzel", serif;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 0.16em;
+      padding-left: 0.16em;
+      color: #EAD9BC;
+      opacity: 0.82;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <svg class="scene" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#1A120C"/>
+          <stop offset="40%" stop-color="#140E0A"/>
+          <stop offset="100%" stop-color="#070807"/>
+        </linearGradient>
+        <radialGradient id="lamp" cx="72%" cy="18%" r="46%">
+          <stop offset="0%" stop-color="#C4A36A" stop-opacity="0.28"/>
+          <stop offset="38%" stop-color="#8FBF7A" stop-opacity="0.06"/>
+          <stop offset="100%" stop-color="#070807" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="crtGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#8FBF7A" stop-opacity="0.55"/>
+          <stop offset="55%" stop-color="#8FBF7A" stop-opacity="0.12"/>
+          <stop offset="100%" stop-color="#8FBF7A" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="crtGlass" cx="42%" cy="38%" r="62%">
+          <stop offset="0%" stop-color="#16301C"/>
+          <stop offset="55%" stop-color="#0A140C"/>
+          <stop offset="100%" stop-color="#050805"/>
+        </radialGradient>
+        <linearGradient id="walnut" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3A2818"/>
+          <stop offset="40%" stop-color="#241810"/>
+          <stop offset="100%" stop-color="#140E0A"/>
+        </linearGradient>
+        <linearGradient id="walnutEdge" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#5C4630"/>
+          <stop offset="50%" stop-color="#2E2016"/>
+          <stop offset="100%" stop-color="#1A120C"/>
+        </linearGradient>
+        <linearGradient id="brass" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#EAD9BC"/>
+          <stop offset="42%" stop-color="#C4A36A"/>
+          <stop offset="100%" stop-color="#7A5A32"/>
+        </linearGradient>
+        <radialGradient id="knob" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#EAD9BC"/>
+          <stop offset="45%" stop-color="#C4A36A"/>
+          <stop offset="100%" stop-color="#5C4630"/>
+        </radialGradient>
+        <filter id="soft"><feGaussianBlur stdDeviation="10"/></filter>
+        <filter id="softer"><feGaussianBlur stdDeviation="22"/></filter>
+        <filter id="wood">
+          <feTurbulence type="fractalNoise" baseFrequency="0.018 0.42" numOctaves="3" seed="4" result="n"/>
+          <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.18  0 0 0 0 0.11  0 0 0 0 0.06  0 0 0 0.35 0" result="g"/>
+          <feBlend in="SourceGraphic" in2="g" mode="multiply"/>
+        </filter>
+        <filter id="crtBloom">
+          <feGaussianBlur stdDeviation="3.5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <clipPath id="crtClip"><circle cx="600" cy="318" r="96"/></clipPath>
+      </defs>
+
+      <rect width="1200" height="630" fill="url(#bg)"/>
+      <rect width="1200" height="630" fill="url(#lamp)"/>
+      <ellipse cx="600" cy="560" rx="430" ry="28" fill="#070807" opacity="0.85" filter="url(#soft)"/>
+
+      <g filter="url(#wood)">
+        <rect x="168" y="168" width="864" height="372" rx="26" fill="url(#walnutEdge)"/>
+        <rect x="184" y="184" width="832" height="340" rx="18" fill="url(#walnut)"/>
+      </g>
+      <rect x="184" y="184" width="832" height="340" rx="18" fill="none" stroke="#C4A36A" stroke-width="3"/>
+      <rect x="196" y="196" width="808" height="316" rx="12" fill="none" stroke="#5C4630" stroke-width="1.4" opacity="0.7"/>
+
+      <g fill="url(#brass)">
+        <circle cx="210" cy="210" r="7"/>
+        <circle cx="990" cy="210" r="7"/>
+        <circle cx="210" cy="496" r="7"/>
+        <circle cx="990" cy="496" r="7"/>
+        <circle cx="360" cy="210" r="5"/>
+        <circle cx="840" cy="210" r="5"/>
+        <circle cx="360" cy="496" r="5"/>
+        <circle cx="840" cy="496" r="5"/>
+      </g>
+
+      <g transform="translate(268 286)">
+        <circle r="58" fill="#140E0A" stroke="#C4A36A" stroke-width="6"/>
+        <circle r="48" fill="#0C100C" stroke="#5C4630" stroke-width="1.5"/>
+        <g stroke="#C4A36A" stroke-width="1.4" opacity="0.7">
+          <path d="M0 -40 L0 -32"/>
+          <path d="M28 -28 L22 -22"/>
+          <path d="M40 0 L32 0"/>
+          <path d="M28 28 L22 22"/>
+          <path d="M0 40 L0 32"/>
+          <path d="M-28 28 L-22 22"/>
+          <path d="M-40 0 L-32 0"/>
+          <path d="M-28 -28 L-22 -22"/>
+        </g>
+        <path d="M0 0 L22 -26" stroke="#8FBF7A" stroke-width="3" stroke-linecap="round"/>
+        <circle r="6" fill="#C4A36A"/>
+      </g>
+
+      <g transform="translate(932 286)">
+        <circle r="58" fill="#140E0A" stroke="#C4A36A" stroke-width="6"/>
+        <circle r="48" fill="#0C100C" stroke="#5C4630" stroke-width="1.5"/>
+        <g stroke="#C4A36A" stroke-width="1.4" opacity="0.7">
+          <path d="M0 -40 L0 -32"/>
+          <path d="M28 -28 L22 -22"/>
+          <path d="M40 0 L32 0"/>
+          <path d="M28 28 L22 22"/>
+          <path d="M0 40 L0 32"/>
+          <path d="M-28 28 L-22 22"/>
+          <path d="M-40 0 L-32 0"/>
+          <path d="M-28 -28 L-22 -22"/>
+        </g>
+        <path d="M0 0 L-8 -30" stroke="#9A4030" stroke-width="3" stroke-linecap="round"/>
+        <circle r="6" fill="#C4A36A"/>
+      </g>
+
+      <circle cx="600" cy="318" r="128" fill="url(#crtGlow)" filter="url(#softer)" opacity="0.9"/>
+      <circle cx="600" cy="318" r="112" fill="#140E0A" stroke="#C4A36A" stroke-width="8"/>
+      <circle cx="600" cy="318" r="102" fill="none" stroke="#8FBF7A" stroke-width="1.6" opacity="0.45"/>
+      <circle cx="600" cy="318" r="96" fill="url(#crtGlass)"/>
+      <g clip-path="url(#crtClip)">
+        <g opacity="0.18" stroke="#8FBF7A" stroke-width="1">
+          <line x1="504" y1="250" x2="696" y2="250"/>
+          <line x1="504" y1="274" x2="696" y2="274"/>
+          <line x1="504" y1="298" x2="696" y2="298"/>
+          <line x1="504" y1="322" x2="696" y2="322"/>
+          <line x1="504" y1="346" x2="696" y2="346"/>
+          <line x1="504" y1="370" x2="696" y2="370"/>
+          <line x1="504" y1="394" x2="696" y2="394"/>
+        </g>
+        <path d="M512 318 C 540 250, 568 386, 600 318 S 660 250, 688 318"
+              fill="none" stroke="#8FBF7A" stroke-width="3.2" stroke-linecap="round" filter="url(#crtBloom)"/>
+        <circle cx="688" cy="318" r="4" fill="#EAD9BC" filter="url(#crtBloom)"/>
+      </g>
+      <circle cx="568" cy="286" r="22" fill="#EAD9BC" opacity="0.07"/>
+
+      <g transform="translate(236 430)">
+        <rect x="-8" y="-58" width="132" height="78" rx="8" fill="#0C100C" stroke="#C4A36A" stroke-width="2"/>
+        <rect x="6" y="-8" width="16" height="18" rx="2" fill="#8FBF7A"/>
+        <rect x="28" y="-18" width="16" height="28" rx="2" fill="#8FBF7A"/>
+        <rect x="50" y="-30" width="16" height="40" rx="2" fill="#8FBF7A"/>
+        <rect x="72" y="-42" width="16" height="52" rx="2" fill="#9A4030"/>
+        <rect x="94" y="-50" width="16" height="60" rx="2" fill="#9A4030"/>
+      </g>
+
+      <g transform="translate(868 430)" fill="#070807" stroke="#C4A36A" stroke-width="1" opacity="0.9">
+        <rect x="0" y="-52" width="108" height="70" rx="8" fill="#0C100C" stroke="#C4A36A" stroke-width="2"/>
+        <circle cx="22" cy="-32" r="4"/>
+        <circle cx="44" cy="-32" r="4"/>
+        <circle cx="66" cy="-32" r="4"/>
+        <circle cx="88" cy="-32" r="4"/>
+        <circle cx="22" cy="-16" r="4"/>
+        <circle cx="44" cy="-16" r="4"/>
+        <circle cx="66" cy="-16" r="4"/>
+        <circle cx="88" cy="-16" r="4"/>
+        <circle cx="22" cy="0" r="4"/>
+        <circle cx="44" cy="0" r="4"/>
+        <circle cx="66" cy="0" r="4"/>
+        <circle cx="88" cy="0" r="4"/>
+      </g>
+
+      <g>
+        <circle cx="430" cy="478" r="18" fill="url(#knob)"/>
+        <circle cx="430" cy="478" r="6" fill="#140E0A"/>
+        <path d="M430 464 L430 472" stroke="#140E0A" stroke-width="2"/>
+        <circle cx="520" cy="478" r="18" fill="url(#knob)"/>
+        <circle cx="520" cy="478" r="6" fill="#140E0A"/>
+        <path d="M512 466 L518 472" stroke="#140E0A" stroke-width="2"/>
+        <circle cx="680" cy="478" r="18" fill="url(#knob)"/>
+        <circle cx="680" cy="478" r="6" fill="#140E0A"/>
+        <path d="M692 470 L684 474" stroke="#140E0A" stroke-width="2"/>
+        <circle cx="770" cy="478" r="18" fill="url(#knob)"/>
+        <circle cx="770" cy="478" r="6" fill="#140E0A"/>
+        <path d="M770 464 L770 472" stroke="#140E0A" stroke-width="2"/>
+      </g>
+
+      <rect x="548" y="462" width="84" height="28" rx="4" fill="#070807" stroke="#C4A36A" stroke-width="1.6"/>
+      <rect x="556" y="470" width="14" height="12" rx="1" fill="#8FBF7A" opacity="0.85"/>
+      <rect x="574" y="470" width="14" height="12" rx="1" fill="#8FBF7A" opacity="0.45"/>
+      <rect x="592" y="470" width="14" height="12" rx="1" fill="#5C4630" opacity="0.5"/>
+      <rect x="610" y="470" width="14" height="12" rx="1" fill="#5C4630" opacity="0.35"/>
+    </svg>
+    <div class="scrim"></div>
+    <div class="lockup">
+      <span class="line-one">Kern's</span>
+      <div class="rule"><span class="rule-line"></span><span class="diamond"></span><span class="rule-line"></span></div>
+      <span class="line-two">SPOOKBOX</span>
+      <span class="tag">they hate it when you do this</span>
+    </div>
+    <div class="grain"></div>
+  </div>
+</body>
+</html>

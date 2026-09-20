@@ -18,6 +18,7 @@ import { RitePanel } from "@/components/box/RitePanel";
 import { EvpPanel } from "@/components/box/EvpPanel";
 import { SlsPanel } from "@/components/box/SlsPanel";
 import { ColdSpotPanel } from "@/components/box/ColdSpotPanel";
+import { SpiritLinePanel } from "@/components/box/SpiritLinePanel";
 import { planchette } from "@/lib/box/planchette";
 import { applyTheme, readTheme, type ThemeId } from "@/lib/box/theme";
 import { bumpSessionCount, getSessionCount } from "@/lib/box/sessions";
@@ -505,6 +506,8 @@ export function SpiritBoxApp() {
 
       <ColdSpotPanel />
 
+      <SpiritLinePanel />
+
       <div className="mt-4 grid grid-cols-3 gap-2">
         {(Object.keys(BANDS) as BandId[]).map((id) => (
           <Button
@@ -610,7 +613,7 @@ export function SpiritBoxApp() {
         <ul className="chassis max-h-56 space-y-1 overflow-y-auto rounded-lg p-2">
           {frame.log.length === 0 && (
             <li className="px-2 py-6 text-center text-sm text-muted">
-              No locks yet. Sweep, Ask, arm a rite, record EVP, scan SLS, or start cold spot.
+              No locks yet. Sweep, Ask, arm a rite, record EVP, scan SLS, start cold spot, or open the ITC line.
             </li>
           )}
           {frame.log.map((hit) => (
@@ -618,7 +621,7 @@ export function SpiritBoxApp() {
               <div className="flex items-baseline justify-between gap-3 font-display text-sm">
                 <span className="text-accent uppercase">{hit.word}</span>
                 <span className="tabular-nums text-muted">
-                  {hit.rite || hit.evp || hit.sls || hit.cold
+                  {hit.rite || hit.evp || hit.sls || hit.cold || hit.spiritLine
                     ? new Date(hit.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
                     : `${formatFreq(hit.band, hit.freq)} ${BANDS[hit.band].unit}`}
                 </span>
@@ -657,6 +660,14 @@ export function SpiritBoxApp() {
                         )}${hit.cold.unit}`
                       : ""}
                 </p>
+              ) : hit.spiritLine ? (
+                <p className="mt-0.5 text-[11px] text-muted">
+                  {hit.spiritLine.action}
+                  {hit.spiritLine.outcome ? ` · ${hit.spiritLine.outcome}` : ""}
+                  {hit.spiritLine.durationMs != null
+                    ? ` · ${(hit.spiritLine.durationMs / 1000).toFixed(1)}s`
+                    : ""}
+                </p>
               ) : (
                 hit.asked && <p className="mt-0.5 text-[11px] text-muted">Q: {hit.asked}</p>
               )}
@@ -667,7 +678,7 @@ export function SpiritBoxApp() {
 
       <p className="mt-4 flex items-start gap-2 text-xs text-muted">
         <Radio className="mt-0.5 size-3.5 shrink-0" />
-        Sweep locks speech-shaped bursts. Ask spells. Rite, EVP, SLS, and cold-spot tools log to this strip. You interpret the session.
+        Sweep locks speech-shaped bursts. Ask spells. Rite, EVP, SLS, cold-spot, and ITC line tools log to this strip. You interpret the session.
       </p>
     </div>
   );

@@ -59,6 +59,14 @@ export type LogHit = {
     delta?: number;
     unit?: "°C" | "lux";
   };
+  /** Optional ITC / Spirit Line in-app audio session (not cellular). */
+  spiritLine?: {
+    action: "armed" | "incoming" | "answered" | "declined" | "ended" | "held" | "mute";
+    /** Call duration at end/decline, ms */
+    durationMs?: number;
+    /** Outcome label e.g. answered, declined, missed */
+    outcome?: string;
+  };
 };
 
 export type BoxFrame = {
@@ -434,6 +442,44 @@ export class SpiritBoxEngine {
       band: this.band,
       strength: 1,
       cold: { action, source, value, delta, unit },
+    };
+    this.log = [hit, ...this.log].slice(0, 48);
+    this.emit();
+  }
+
+  logSpiritLine(
+    action: "armed" | "incoming" | "answered" | "declined" | "ended" | "held" | "mute",
+    opts?: { durationMs?: number; outcome?: string },
+  ) {
+    const durationMs = opts?.durationMs;
+    const outcome = opts?.outcome;
+    const durTag =
+      durationMs != null ? ` · ${(durationMs / 1000).toFixed(1)}s` : "";
+    const outTag = outcome ? ` · ${outcome}` : "";
+    const label =
+      action === "armed"
+        ? "ITC · ARMED"
+        : action === "incoming"
+          ? outcome
+            ? `ITC · RING · ${outcome}`
+            : "ITC · RING"
+          : action === "answered"
+            ? "ITC · ANSWER"
+            : action === "declined"
+              ? `ITC · DECLINE${durTag}`
+              : action === "ended"
+                ? `ITC · END${durTag}${outTag}`
+                : action === "held"
+                  ? "ITC · HOLD"
+                  : "ITC · MUTE";
+    const hit: LogHit = {
+      id: this.hitId++,
+      at: Date.now(),
+      word: label,
+      freq: this.freq,
+      band: this.band,
+      strength: 1,
+      spiritLine: { action, durationMs, outcome },
     };
     this.log = [hit, ...this.log].slice(0, 48);
     this.emit();

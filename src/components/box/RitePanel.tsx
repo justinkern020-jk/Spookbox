@@ -10,27 +10,116 @@ import {
 
 type Phase = "idle" | "armed" | "running";
 
+/** Kept alive so Chrome doesn't GC the utterance mid-speak. */
+let activeUtter: SpeechSynthesisUtterance | null = null;
+let resumeTimer: number | null = null;
+
 function stopSpeech() {
   try {
+    if (resumeTimer != null) {
+      window.clearInterval(resumeTimer);
+      resumeTimer = null;
+    }
     window.speechSynthesis?.cancel();
   } catch {
     /* unsupported */
   }
+  activeUtter = null;
 }
 
-function speakText(text: string, lang: string, onEnd: () => void) {
+function pickVoice(lang: string): SpeechSynthesisVoice | null {
+  const voices = window.speechSynthesis?.getVoices?.() ?? [];
+  if (!voices.length) return null;
+  const base = lang.toLowerCase().split("-")[0] ?? lang.toLowerCase();
+  return (
+    voices.find((v) => v.lang.toLowerCase() === lang.toLowerCase()) ||
+    voices.find((v) => v.lang.toLowerCase().startsWith(base)) ||
+    voices.find((v) => v.default) ||
+    voices[0] ||
+    null
+  );
+}
+
+function waitForVoices(): Promise<SpeechSynthesisVoice[]> {
+  return new Promise((resolve) => {
+    const syn = window.speechSynthesis;
+    if (!syn) {
+      resolve([]);
+      return;
+    }
+    const now = syn.getVoices();
+    if (now.length) {
+      resolve(now);
+      return;
+    }
+    const done = () => {
+      syn.removeEventListener("voiceschanged", done);
+      resolve(syn.getVoices());
+    };
+    syn.addEventListener("voiceschanged", done);
+    // Android sometimes never fires voiceschanged — don't hang Start.
+    window.setTimeout(() => {
+      syn.removeEventListener("voiceschanged", done);
+      resolve(syn.getVoices());
+    }, 400);
+  });
+}
+
+/** Pixel/Chrome often drops the first speak and pauses the synth mid-utterance. */
+async function speakText(text: string, lang: string, onEnd: () => void) {
   stopSpeech();
   if (typeof window === "undefined" || !window.speechSynthesis || !window.SpeechSynthesisUtterance) {
     onEnd();
     return;
   }
-  const utter = new SpeechSynthesisUtterance(text.replace(/\n+/g, " ").trim());
+  const syn = window.speechSynthesis;
+  await waitForVoices();
+  // Kick a silent/short warm-up — Chrome Android ignores the first real speak otherwise.
+  try {
+    syn.cancel();
+    const warm = new SpeechSynthesisUtterance(" ");
+    warm.volume = 0;
+    syn.speak(warm);
+    syn.cancel();
+  } catch {
+    /* ignore */
+  }
+
+  const body = text.replace(/\n+/g, " ").trim();
+  const utter = new SpeechSynthesisUtterance(body);
+  activeUtter = utter;
   utter.lang = lang;
   utter.rate = 0.92;
   utter.pitch = 1;
-  utter.onend = () => onEnd();
-  utter.onerror = () => onEnd();
-  window.speechSynthesis.speak(utter);
+  utter.volume = 1;
+  const voice = pickVoice(lang);
+  if (voice) {
+    utter.voice = voice;
+    utter.lang = voice.lang || lang;
+  }
+  let finished = false;
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    if (resumeTimer != null) {
+      window.clearInterval(resumeTimer);
+      resumeTimer = null;
+    }
+    activeUtter = null;
+    onEnd();
+  };
+  utter.onend = () => finish();
+  utter.onerror = () => finish();
+  // Chrome bug: synth goes to paused and never resumes without a nudge.
+  resumeTimer = window.setInterval(() => {
+    try {
+      if (syn.paused) syn.resume();
+    } catch {
+      /* ignore */
+    }
+  }, 250);
+  syn.resume();
+  syn.speak(utter);
 }
 
 export function RitePanel() {
@@ -57,6 +146,11 @@ export function RitePanel() {
   }, [traditionId, prayerId, tradition.prayers]);
 
   useEffect(() => {
+    try {
+      window.speechSynthesis?.getVoices();
+    } catch {
+      /* unsupported */
+    }
     return () => {
       runGen.current += 1;
       stopSpeech();
@@ -93,13 +187,14 @@ export function RitePanel() {
     box.logRite(tradition.label, prayer.shortName, "start");
     const supported = typeof window !== "undefined" && !!window.speechSynthesis;
     if (!supported) {
-      setTtsNote("Speech synthesis unavailable — text only.");
+      setTtsNote("Speech unavailable on this browser — read the text on screen.");
       return;
     }
-    setTtsNote(null);
-    speakText(prayer.text, prayer.lang, () => {
+    setTtsNote("Speaking… turn media volume up.");
+    void speakText(prayer.text, prayer.lang, () => {
       if (gen !== runGen.current) return;
       setPhase("armed");
+      setTtsNote(null);
       box.logRite(tradition.label, prayer.shortName, "complete");
     });
   };
@@ -188,7 +283,7 @@ export function RitePanel() {
 
       {ttsNote && <p className="mt-2 text-xs text-muted">{ttsNote}</p>}
       <p className="mt-2 text-xs text-muted">
-        Select tradition and prayer, arm, then start. Recitation uses device speech synthesis. Logged to the session strip.
+        Select tradition and prayer, arm, then start. Uses your phone's text-to-speech — turn media volume up. Logged to the session strip.
       </p>
     </section>
   );
